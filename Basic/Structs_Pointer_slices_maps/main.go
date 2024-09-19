@@ -6,6 +6,21 @@ import (
 	"strings"
 )
 
+type Vertex struct {
+	X, Y float64
+}
+
+func (v *Vertex) Scale(f float64) {
+	v.X = v.X * f
+	v.Y = v.Y * f
+}
+
+func ScaleFunc(v *Vertex, f float64) {
+	v.X = v.X * f
+	v.Y = v.Y * f
+}
+
+
 func printSlice(s []int) {
 	//A nil slice has a length and capacity of 0 and has no underlying array.
 	if s == nil {
@@ -274,7 +289,6 @@ func main(){
 	fmt.Println(compute(hypot))
 	fmt.Println(compute(math.Pow))
 
-
 	
 
 }
@@ -295,4 +309,6 @@ func adder() func(int) int {
 		return sum
 	}
 }
+
+
 
