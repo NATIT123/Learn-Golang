@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
+	"main/common"
+	"main/modules/item/models"
+	"main/modules/item/transport/ginitem"
 	"net/http"
 	"os"
-	"strconv"
-	"time"
 
 	"github.com/joho/godotenv"
 
@@ -15,54 +15,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+
   
 
-type TodoItem struct{
-	Id int `json:"id" gorm:"column:id;"`
-	Title string `json:"title" gorm:"column:title;"`
-	Description string `json:"description" gorm:"column:description;"`
-	Status string `json:"status" gorm:"column:status;"`
-	CreatedAt	*time.Time	`json:"created_at" gorm:"column:created_at;"`
-	UpdatedAt	*time.Time	`json:"updated_at" gorm:"column:updated_at;"`
-}
-
-func (TodoItem)	TableName()	string{return "todo_items"}
-
-type TodoItemCreation struct{
-	Id	int	`json:"id" gorm:"column:id;"`
-	Title	string	`json:"title" gorm:"column:title;"`
-	Description	string	`json:"description"	gorm:"column:description;"`
-}
-
-type TodoItemUpdate struct{
-	Title	*string	`json:"title" gorm:"column:title;"`
-	Description	*string	`json:"description"	gorm:"column:description;"`
-	Status *string `json:"status" gorm:"column:status;"`
-}
 
 
-func(TodoItemUpdate) TableName() string{return TodoItem{}.TableName()}
-
-
-
-func (TodoItemCreation)	TableName()	string{return TodoItem{}.TableName()}
-
-
-type Paging struct{
-	Page int `json:"page" form:"page"`
-	Limit	int	`json:"limit" form:"limit"`
-	Total	int64 `json:"total" form:"-"`
-}
-
-func(p *Paging) Process(){
-	if p.Page<=0{
-		p.Page=1
-	}
-
-	if(p.Limit<=0||p.Limit>=100){
-		p.Limit=10
-	}
-}
 
 func main(){
 
@@ -88,40 +46,40 @@ func main(){
 
 	
 
-	now:=time.Now().UTC()
+	// now:=time.Now().UTC()
 
-	item := TodoItem{
-		Id:	1,
-		Title:"This is item 1",
-		Description:"This is item 1",
-		Status:	"Doing",
-		CreatedAt: &now,
-		UpdatedAt: nil,
-	}
+	// item := TodoItem{
+	// 	Id:	1,
+	// 	Title:"This is item 1",
+	// 	Description:"This is item 1",
+	// 	Status:	ItemStatusDoing,
+	// 	CreatedAt: &now,
+	// 	UpdatedAt: nil,
+	// }
 
-	///Convert JSONData =byte[],err
-	jsonData,err:= json.Marshal(item)
-
-
-	if err!=nil{
-		fmt.Println(err)
-		return
-	}
-
-	///Convert to JSON
-	fmt.Println(string(jsonData))
+	// ///Convert JSONData =byte[],err
+	// jsonData,err:= json.Marshal(item)
 
 
+	// if err!=nil{
+	// 	fmt.Println(err)
+	// 	return
+	// }
+
+	// ///Convert to JSON
+	// fmt.Println(string(jsonData))
 
 
-	var item2 TodoItem
 
-	if err:=json.Unmarshal([]byte(jsonData),&item2); err!=nil{
-		fmt.Println(err)
-		return
-	}
 
-	fmt.Println(item2)
+	// var item2 TodoItem
+
+	// if err:=json.Unmarshal([]byte(jsonData),&item2); err!=nil{
+	// 	fmt.Println(err)
+	// 	return
+	// }
+
+	// fmt.Println(item2)
 
 
 	/////For
@@ -157,151 +115,31 @@ func main(){
 	{
 		items:=v1.Group("/items")
 		{
-			items.POST("",createItem(db))
+			items.POST("",ginitem.CreateItem(db))
 			items.GET("",getListItem(db))
-			items.GET("/:id",getItem(db))
-			items.PATCH("/:id",updateItem(db))
-			items.DELETE("/:id",deleteItem(db))
+			items.GET("/:id",ginitem.GetItem(db))
+			items.PATCH("/:id",ginitem.UpdateItem(db))
+			items.DELETE("/:id",ginitem.DeleteItem(db))
 		}
 	}
 
   	r.GET("/ping", func(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{
-      "message": item,
+      "message": "Hello World",
     })
   })
-  r.Run(PORT) // listen and serve on 0.0.0.0:8080 (for windows "localhost:3000")
+  r.Run(PORT) // listen and serve on 0.0.0.0:3000(for windows "localhost:3000")
 
 
 	
 }
 
-func createItem(db	*gorm.DB) func(*gin.Context){
-	return func(c *gin.Context){
-		var data TodoItemCreation
 
-		if err:=c.ShouldBind(&data);err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-
-			return 
-		}
-
-		if err:=db.Create(&data).Error;err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-
-			return 
-		}
-
-		c.JSON(http.StatusOK,gin.H{
-			"id":data.Id,
-			"data":data,
-		})
-	}
-}
-
-func getItem(db *gorm.DB) func(*gin.Context){
-	return func(c *gin.Context){
-		var data  TodoItem
-
-		id,err:=strconv.Atoi(c.Param("id"))
-
-		if err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-			return 
-		}
-
-
-		if err:=db.Where("id = ?",id).First(&data).Error;err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-
-			return 
-		}
-
-		c.JSON(http.StatusOK,gin.H{
-			"data":data,
-		})
-	}
-}
-
-func updateItem(db *gorm.DB) func(*gin.Context){
-	return func(c *gin.Context){
-		var data  TodoItemUpdate
-
-		id,err:=strconv.Atoi(c.Param("id"))
-
-		if err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-			return 
-		}
-
-		if err:=c.ShouldBind(&data);err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-
-			return 
-		}
-
-
-		if err:=db.Where("id = ?",id).Updates(&data).Error;err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-
-			return 
-		}
-
-		c.JSON(http.StatusOK,gin.H{
-			"data":true,
-		})
-	}
-}
-
-
-func deleteItem(db *gorm.DB) func(*gin.Context){
-	return func(c *gin.Context){
-		
-		id,err:=strconv.Atoi(c.Param("id"))
-
-		if err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-			return 
-		}
-
-
-
-		if err:=db.Table(TodoItem{}.TableName()).Where("id = ?",id).Updates(map[string]interface{}{
-			"status":"Delete",
-		}).Error;err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-
-			return 
-		}
-
-		c.JSON(http.StatusOK,gin.H{
-			"data":true,
-		})
-	}
-}
 
 func getListItem(db *gorm.DB) func(*gin.Context){
 	return func(c *gin.Context){
 
-		var paging Paging
+		var paging  common.Paging
 		
 		if err:=c.ShouldBind(&paging);err!=nil{
 			c.JSON(http.StatusBadRequest,gin.H{
@@ -313,12 +151,12 @@ func getListItem(db *gorm.DB) func(*gin.Context){
 
 		paging.Process()
 
-		var result []TodoItem
+		var result [] models.TodoItem
 
 
 		db = db.Where("status <> ?","Delete")
 
-		if	err:=db.Table(TodoItem{}.TableName()).
+		if	err:=db.Table(models.TodoItem{}.TableName()).
 		Count(&paging.Total).Error;err!=nil{
 			c.JSON(http.StatusBadRequest,gin.H{
 				"error":err.Error(),
@@ -338,9 +176,8 @@ func getListItem(db *gorm.DB) func(*gin.Context){
 			return 
 		}
 
-		c.JSON(http.StatusOK,gin.H{
-			"data":result,
-			"paging":paging,
-		})
+		
+
+		c.JSON(http.StatusOK,common.NewSuccessResponse(result,paging,nil))
 	}
 }
