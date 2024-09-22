@@ -12,7 +12,7 @@ type AppError struct {
 	RootErr    error  `json:"-"`
 	Message    string `json:"message"`
 	Log        string `json:"log"`
-	Key        string `json:error_key`
+	ErrorKey   string `json:"error_key"`
 }
 
 func NewFullErrorResponse(statusCode int, root error, msg, log, key string) *AppError {
@@ -21,7 +21,7 @@ func NewFullErrorResponse(statusCode int, root error, msg, log, key string) *App
 		RootErr:    root,
 		Message:    msg,
 		Log:        log,
-		Key:        key,
+		ErrorKey:   key,
 	}
 }
 
@@ -31,7 +31,7 @@ func NewErrorResponse(root error, msg, log, key string) *AppError {
 		RootErr:    root,
 		Message:    msg,
 		Log:        log,
-		Key:        key,
+		ErrorKey:   key,
 	}
 }
 func NewUnauthorized(root error, msg, log, key string) *AppError {
@@ -40,106 +40,104 @@ func NewUnauthorized(root error, msg, log, key string) *AppError {
 		RootErr:    root,
 		Message:    msg,
 		Log:        log,
-		Key:        key,
+		ErrorKey:   key,
 	}
 }
 
-func (e *AppError) RootError() error{
-	if err,ok:=e.RootErr.(*AppError);ok{
+func (e *AppError) RootError() error {
+	if err, ok := e.RootErr.(*AppError); ok {
 		return err.RootError()
 	}
 
 	return e.RootErr
 }
 
-func (e *AppError) Error() string{
+func (e *AppError) Error() string {
 	return e.RootError().Error()
 }
 
-func NewCustomError(root error,msg string,key string) *AppError{
-	if root!=nil{
-		return NewErrorResponse(root,msg,root.Error(),key)
+func NewCustomError(root error, msg string, key string) *AppError {
+	if root != nil {
+		return NewErrorResponse(root, msg, root.Error(), key)
 	}
 
-	return NewErrorResponse(errors.New(msg),msg,msg,key)
+	return NewErrorResponse(errors.New(msg), msg, msg, key)
 }
 
-func ErrDB(err error) *AppError{
-	return NewFullErrorResponse(http.StatusInternalServerError,err,"something went wronng with DB",err.Error(),"DB_ERROR")
+func ErrDB(err error) *AppError {
+	return NewFullErrorResponse(http.StatusInternalServerError, err, "something went wronng with DB", err.Error(), "DB_ERROR")
 }
 
-func ErrInvalidRequest(err error) *AppError{
-	return NewErrorResponse(err,"invalid request",err.Error(),"ErrInvalidRequest")
+func ErrInvalidRequest(err error) *AppError {
+	return NewErrorResponse(err, "invalid request", err.Error(), "ErrInvalidRequest")
 }
 
-func ErrInternal(err error) *AppError{
-	return NewFullErrorResponse(http.StatusInternalServerError,err,"something went wrong in the server",err.Error(),"ErrInternal")
+func ErrInternal(err error) *AppError {
+	return NewFullErrorResponse(http.StatusInternalServerError, err, "something went wrong in the server", err.Error(), "ErrInternal")
 }
 
-func ErrCannotListEntity(entity string,err error) *AppError{
+func ErrCannotListEntity(entity string, err error) *AppError {
 	return NewCustomError(
 		err,
-		fmt.Sprintf("Can not list %s",strings.ToLower(entity)),
-		fmt.Sprintf("ErrCannotList%s",entity),
+		fmt.Sprintf("Can not list %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotList%s", entity),
 	)
 }
 
-func ErrCannotDeleteEntity(entity string,err error) *AppError{
+func ErrCannotDeleteEntity(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("Can not delete %s",strings.ToLower(entity)),
-		fmt.Sprintf("ErrCannotDelete%s",entity),
+		err, fmt.Sprintf("Can not delete %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotDelete%s", entity),
 	)
 }
 
-func ErrCannotUpdateEntity(entity string,err error) *AppError{
+func ErrCannotUpdateEntity(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("Can not update %s",strings.ToLower(entity)),
-		fmt.Sprintf("ErrCannotUpdate%s",entity),
+		err, fmt.Sprintf("Can not update %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotUpdate%s", entity),
 	)
 }
 
-func ErrCannotGetEntity(entity string,err error) *AppError{
+func ErrCannotGetEntity(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("Can not get %s",strings.ToLower(entity)),
-		fmt.Sprintf("ErrCannotGet%s",entity),
+		err, fmt.Sprintf("Can not get %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotGet%s", entity),
 	)
 }
 
-func ErrEntityDeleted(entity string,err error) *AppError{
+func ErrEntityDeleted(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("%s deleted",strings.ToLower(entity)),
-		fmt.Sprintf("Err%sDeleted",entity),
+		err, fmt.Sprintf("%s deleted", strings.ToLower(entity)),
+		fmt.Sprintf("Err%sDeleted", entity),
 	)
 }
 
-func ErrEntityExisted(entity string,err error) *AppError{
+func ErrEntityExisted(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("%s already exists",strings.ToLower(entity)),
-		fmt.Sprintf("Err%sAlreadyExists",entity),
+		err, fmt.Sprintf("%s already exists", strings.ToLower(entity)),
+		fmt.Sprintf("Err%sAlreadyExists", entity),
 	)
 }
 
-
-func ErrEntityNotFound(entity string,err error) *AppError{
+func ErrEntityNotFound(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("%s not found",strings.ToLower(entity)),
-		fmt.Sprintf("Err%sNotFound",entity),
+		err, fmt.Sprintf("%s not found", strings.ToLower(entity)),
+		fmt.Sprintf("Err%sNotFound", entity),
 	)
 }
 
-func ErrCannotCreateEntity(entity string,err error) *AppError{
+func ErrCannotCreateEntity(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("Can not create %s",strings.ToLower(entity)),
-		fmt.Sprintf("ErrCannotCreate%s",entity),
+		err, fmt.Sprintf("Can not create %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotCreate%s", entity),
 	)
 }
 
-func ErrNoPermission(entity string,err error) *AppError{
+func ErrNoPermission(entity string, err error) *AppError {
 	return NewCustomError(
-		err,fmt.Sprintf("You have no permission"),
-		fmt.Sprintf("ErrNoPermission"),
+		err, "You have no permission",
+		"ErrNoPermission",
 	)
 }
-
 
 var RecordNotFound = errors.New("record not found")

@@ -5,16 +5,19 @@ import (
 	"main/common"
 )
 
+const (
+	EntityName = "Item"
+)
 
-var(
-	ErrTitleIsBlank = errors.New("Title can not be blank")
-	ErrItemDeleted = errors.New("item is deleted")
+var (
+	ErrTitleIsBlank = errors.New("title can not be blank")
+	ErrItemDeleted  = errors.New("item is deleted")
 )
 
 type TodoItem struct {
 	common.SQLModel
-	Title       string `json:"title" gorm:"column:title;"`
-	Description string `json:"description" gorm:"column:description;"`
+	Title       string      `json:"title" gorm:"column:title;"`
+	Description string      `json:"description" gorm:"column:description;"`
 	Status      *ItemStatus `json:"status" gorm:"column:status;"`
 }
 

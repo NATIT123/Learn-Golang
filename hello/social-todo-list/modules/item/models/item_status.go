@@ -28,7 +28,7 @@ func parseStr2ItemStatus(s string) (ItemStatus, error) {
 		}
 	}
 
-	return ItemStatus(0), errors.New("Invalid status string")
+	return ItemStatus(0), errors.New("invalid status string")
 }
 
 func (item *ItemStatus) Scan(value interface{}) error {

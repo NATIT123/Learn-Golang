@@ -11,29 +11,24 @@ import (
 	"gorm.io/gorm"
 )
 
-func DeleteItem(db *gorm.DB) func(*gin.Context){
-	return func(c *gin.Context){
-		
-		id,err:=strconv.Atoi(c.Param("id"))
+func DeleteItem(db *gorm.DB) func(*gin.Context) {
+	return func(c *gin.Context) {
 
-		if err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
-			return 
-		}
+		id, err := strconv.Atoi(c.Param("id"))
 
-		store:= storage.NewSQLStore(db)
-		bussiness :=biz.NewDeleteItemBiz(store)
-
-		if err:= bussiness.DeletetemById(c.Request.Context(),id);err!=nil{
-			c.JSON(http.StatusBadRequest,gin.H{
-				"error":err.Error(),
-			})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 			return
 		}
 
-		
-		c.JSON(http.StatusOK,common.SimpleSuccessResponse(true))
+		store := storage.NewSQLStore(db)
+		bussiness := biz.NewDeleteItemBiz(store)
+
+		if err := bussiness.DeletetemById(c.Request.Context(), id); err != nil {
+			c.JSON(http.StatusBadRequest, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

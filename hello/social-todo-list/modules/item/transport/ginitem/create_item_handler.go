@@ -16,22 +16,16 @@ func CreateItem(db *gorm.DB) func(*gin.Context) {
 		var data models.TodoItemCreation
 
 		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 
 			return
 		}
 
-		store:= storage.NewSQLStore(db)
-		bussiness :=biz.NewCreateItemBiz(store)
+		store := storage.NewSQLStore(db)
+		bussiness := biz.NewCreateItemBiz(store)
 
-
-		if err:=bussiness.CreateNewItem(c.Request.Context(),&data);err!=nil{
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
+		if err := bussiness.CreateNewItem(c.Request.Context(), &data); err != nil {
+			c.JSON(http.StatusBadRequest, err)
 			return
 		}
 
