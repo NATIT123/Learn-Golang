@@ -5,7 +5,7 @@ import (
 	"log"
 	"main/common"
 	"main/middleware"
-	"main/modules/item/models"
+	"main/modules/item/storage"
 	"main/modules/item/transport/ginitem"
 	"net/http"
 	"os"
@@ -13,8 +13,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -27,16 +25,14 @@ func main() {
 	PORT := os.Getenv("PORT")
 	DB_CONN_STR := os.Getenv("DB_CONN_STR")
 
-	// https://github.com/jackc/pgx
-	///Connect PostgreSQL
-	dsn := DB_CONN_STR
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db := storage.CreateSQL(DB_CONN_STR)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
+	////MongoDb
+	store := storage.CreateMongo()
+	client := store.Client
 
-	fmt.Println(db)
+	///Collection
+	collection := client.Database("test").Collection("users")
 
 	// now:=time.Now().UTC()
 
@@ -101,7 +97,7 @@ func main() {
 		items := v1.Group("/items", middleware.Recovery())
 		{
 			items.POST("", ginitem.CreateItem(db))
-			items.GET("", getListItem(db))
+			items.GET("", ginitem.ListItem(db))
 			items.GET("/:id", ginitem.GetItem(db))
 			items.PATCH("/:id", ginitem.UpdateItem(db))
 			items.DELETE("/:id", ginitem.DeleteItem(db))
@@ -119,47 +115,4 @@ func main() {
 	})
 	r.Run(PORT) // listen and serve on 0.0.0.0:3000(for windows "localhost:3000")
 
-}
-
-func getListItem(db *gorm.DB) func(*gin.Context) {
-	return func(c *gin.Context) {
-
-		var paging common.Paging
-
-		if err := c.ShouldBind(&paging); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
-			return
-		}
-
-		paging.Process()
-
-		var result []models.TodoItem
-
-		db = db.Where("status <> ?", "Delete")
-
-		if err := db.Table(models.TodoItem{}.TableName()).
-			Count(&paging.Total).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
-			return
-		}
-
-		if err := db.Order("id desc").
-			Offset((paging.Page - 1) * paging.Limit).
-			Limit(paging.Limit).
-			Find(&result).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
-			return
-		}
-
-		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
-	}
 }

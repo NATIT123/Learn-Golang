@@ -40,13 +40,13 @@ func (item *ItemStatus) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 
 	if !ok {
-		return errors.New(fmt.Sprintf("fail to scan data from sql: %s", value))
+		return fmt.Errorf("fail to scan data from sql: %s", value)
 	}
 
 	v, err := parseStr2ItemStatus(string(bytes))
 
 	if err != nil {
-		return errors.New(fmt.Sprintf("fail to scan data from sql: %s", value))
+		return fmt.Errorf("fail to scan data from sql: %s", value)
 	}
 
 	*item = v
