@@ -11,6 +11,7 @@ import (
 	ginitem "main/modules/item/transport/ginitem/postgreSQL"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 
@@ -31,6 +32,8 @@ func main() {
 
 	////MongoDb
 	DB_MONGO := os.Getenv("DB_MONGO")
+	DB_MONGO = strings.Replace(DB_MONGO, "db_username", os.Getenv("DB_MONGO_USER"), 1)
+	DB_MONGO = strings.Replace(DB_MONGO, "<db_password>", os.Getenv("DB_MONGO_PASSWORD"), 1)
 	store := storagemongo.CreateMongo(DB_MONGO)
 	client := store.Client
 
@@ -109,6 +112,8 @@ func main() {
 		users := v2.Group("/users")
 		{
 			users.POST("", ginitemMongo.CreateUser(client))
+			users.GET("/:id", ginitemMongo.GetUser(client))
+			users.PATCH("/:id", ginitemMongo.UpdateUser(client))
 		}
 	}
 
