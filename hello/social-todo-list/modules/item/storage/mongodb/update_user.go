@@ -8,6 +8,7 @@ import (
 	mmongodb "main/modules/item/models/mongodb"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -28,9 +29,16 @@ func (mongoClient *mongoStore) UpdateUser(ctx context.Context, cond map[string]i
 		return common.ErrDB(err)
 	}
 
-	fmt.Println(dataUpdate)
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "name", Value: dataUpdate.Name},
+		{Key: "email", Value: dataUpdate.Email},
+		{Key: "photo", Value: dataUpdate.Photo},
+		{Key: "password", Value: dataUpdate.Password},
+		{Key: "role", Value: dataUpdate.Role},
+		{Key: "active", Value: dataUpdate.Active}}}}
 
-	if _, err := collection.UpdateOne(ctx, cond, dataUpdate); err != nil {
+	fmt.Println(update)
+
+	if _, err := collection.UpdateOne(ctx, cond, update); err != nil {
 		return common.ErrCannotUpdateEntity(mmongodb.EntityName, err)
 	}
 

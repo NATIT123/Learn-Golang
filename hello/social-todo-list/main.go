@@ -114,6 +114,8 @@ func main() {
 			users.POST("", ginitemMongo.CreateUser(client))
 			users.GET("/:id", ginitemMongo.GetUser(client))
 			users.PATCH("/:id", ginitemMongo.UpdateUser(client))
+			users.DELETE("/:id", ginitemMongo.DeleteUser(client))
+			users.GET("", ginitemMongo.ListUser(client))
 		}
 	}
 

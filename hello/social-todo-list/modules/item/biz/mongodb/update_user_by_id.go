@@ -34,7 +34,7 @@ func (biz *updateUserBiz) UpdateUserById(ctx context.Context, id primitive.Objec
 	}
 
 	if !data.Active {
-		return common.ErrEntityDeleted(models.EntityName, mmongodb.ErrItemDeleted)
+		return common.ErrEntityDeleted(models.EntityName, mmongodb.ErrUserDeleted)
 	}
 
 	if err := biz.store.UpdateUser(ctx, map[string]interface{}{"_id": id}, dataUpdate); err != nil {

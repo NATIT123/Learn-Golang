@@ -1,10 +1,8 @@
 package ginitem
 
 import (
-	"fmt"
 	"main/common"
 	bizmongo "main/modules/item/biz/mongodb"
-	mmongodb "main/modules/item/models/mongodb"
 	storage "main/modules/item/storage/mongodb"
 	"net/http"
 
@@ -13,12 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func UpdateUser(client *mongo.Client) func(*gin.Context) {
+func DeleteUser(client *mongo.Client) func(*gin.Context) {
 	return func(c *gin.Context) {
-
-		var data mmongodb.UserUpdate
-
-		fmt.Println(data)
 
 		id := c.Param("id")
 
@@ -31,16 +25,10 @@ func UpdateUser(client *mongo.Client) func(*gin.Context) {
 			objectID = oid
 		}
 
-		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
-			return
-
-		}
-
 		store := storage.NewMongoStore(client)
-		bussiness := bizmongo.NewUpdateUserBiz(store)
+		bussiness := bizmongo.NewDeleteUserBiz(store)
 
-		if err := bussiness.UpdateUserById(c.Request.Context(), objectID, &data); err != nil {
+		if err := bussiness.DeleteUserById(c.Request.Context(), objectID); err != nil {
 			c.JSON(http.StatusBadRequest, err)
 			return
 		}

@@ -11,8 +11,8 @@ const (
 )
 
 var (
-	ErrTitleIsBlank = errors.New("name can not be blank")
-	ErrItemDeleted  = errors.New("user is deleted")
+	ErrNameIsBlank = errors.New("name can not be blank")
+	ErrUserDeleted = errors.New("user is deleted")
 )
 
 type User struct {
