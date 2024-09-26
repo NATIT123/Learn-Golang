@@ -2,9 +2,9 @@ package ginitem
 
 import (
 	"main/common"
-	"main/modules/item/biz"
-	"main/modules/item/models"
-	"main/modules/item/storage"
+	biz "main/modules/item/biz/postgreSQL"
+	models "main/modules/item/models/postgreSQL"
+	storage "main/modules/item/storage/postgreSQL"
 	"net/http"
 	"strconv"
 

@@ -3,7 +3,7 @@ package biz
 import (
 	"context"
 	"main/common"
-	"main/modules/item/models"
+	"main/modules/item/models/postgreSQL"
 )
 
 type UpdateItemStorage interface {

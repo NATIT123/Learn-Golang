@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"main/common"
-	"main/modules/item/models"
+	"main/modules/item/models/postgreSQL"
 )
 
 func (sql *sqlStore) CreateItem(ctx context.Context, data *models.TodoItemCreation) error {

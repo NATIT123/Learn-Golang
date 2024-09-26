@@ -1,4 +1,4 @@
-package storage
+package storagemongo
 
 import (
 	"context"
@@ -9,14 +9,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoStore struct {
+type mongoStore struct {
 	Client *mongo.Client
 }
 
-func CreateMongo() *MongoStore {
+func CreateMongo(DB_MONGO string) *mongoStore {
 	// Use the SetServerAPIOptions() method to set the version of the Stable API on the client
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI("mongodb+srv://tuosama1234:<db_password>@natorus.anwy1.mongodb.net/?retryWrites=true&w=majority&appName=Natorus").SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI(DB_MONGO).SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
 	client, err := mongo.Connect(context.TODO(), opts)
@@ -36,5 +36,9 @@ func CreateMongo() *MongoStore {
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	return &MongoStore{Client: client}
+	return &mongoStore{Client: client}
+}
+
+func NewMongoStore(client *mongo.Client) *mongoStore {
+	return &mongoStore{Client: client}
 }

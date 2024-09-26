@@ -2,9 +2,9 @@ package ginitem
 
 import (
 	"main/common"
-	"main/modules/item/biz"
-	"main/modules/item/models"
-	"main/modules/item/storage"
+	"main/modules/item/biz/postgreSQL"
+	"main/modules/item/models/postgreSQL"
+	"main/modules/item/storage/postgreSQL"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

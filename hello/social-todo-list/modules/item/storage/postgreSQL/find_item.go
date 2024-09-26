@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"main/common"
-	"main/modules/item/models"
+	"main/modules/item/models/postgreSQL"
 
 	"gorm.io/gorm"
 )

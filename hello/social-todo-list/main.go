@@ -5,8 +5,10 @@ import (
 	"log"
 	"main/common"
 	"main/middleware"
-	"main/modules/item/storage"
-	"main/modules/item/transport/ginitem"
+	storagemongo "main/modules/item/storage/mongodb"
+	storage "main/modules/item/storage/postgreSQL"
+	ginitemMongo "main/modules/item/transport/ginitem/mongodb"
+	ginitem "main/modules/item/transport/ginitem/postgreSQL"
 	"net/http"
 	"os"
 
@@ -28,11 +30,9 @@ func main() {
 	db := storage.CreateSQL(DB_CONN_STR)
 
 	////MongoDb
-	store := storage.CreateMongo()
+	DB_MONGO := os.Getenv("DB_MONGO")
+	store := storagemongo.CreateMongo(DB_MONGO)
 	client := store.Client
-
-	///Collection
-	collection := client.Database("test").Collection("users")
 
 	// now:=time.Now().UTC()
 
@@ -101,6 +101,14 @@ func main() {
 			items.GET("/:id", ginitem.GetItem(db))
 			items.PATCH("/:id", ginitem.UpdateItem(db))
 			items.DELETE("/:id", ginitem.DeleteItem(db))
+		}
+	}
+
+	v2 := r.Group("/v2")
+	{
+		users := v2.Group("/users")
+		{
+			users.POST("", ginitemMongo.CreateUser(client))
 		}
 	}
 

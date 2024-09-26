@@ -2,8 +2,8 @@ package ginitem
 
 import (
 	"main/common"
-	"main/modules/item/biz"
-	"main/modules/item/storage"
+	"main/modules/item/biz/postgreSQL"
+	"main/modules/item/storage/postgreSQL"
 	"net/http"
 	"strconv"
 
