@@ -14,6 +14,15 @@ type mongoStore struct {
 }
 
 func CreateMongo(DB_MONGO string) *mongoStore {
+
+	//Connect MongoDb Local
+	// mongoURI := "mongodb://localhost:27017" + dbName
+	// client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// defer cancel()
+	// err := client.Connect(ctx)
+	// db := client.Database(dbName)
+
 	// Use the SetServerAPIOptions() method to set the version of the Stable API on the client
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(DB_MONGO).SetServerAPIOptions(serverAPI)

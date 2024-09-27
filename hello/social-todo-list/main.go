@@ -37,6 +37,9 @@ func main() {
 	store := storagemongo.CreateMongo(DB_MONGO)
 	client := store.Client
 
+	//Weather
+	API_KEY := os.Getenv("OpenWeatherMapApiKey")
+
 	// now:=time.Now().UTC()
 
 	// item := TodoItem{
@@ -117,6 +120,11 @@ func main() {
 			users.DELETE("/:id", ginitemMongo.DeleteUser(client))
 			users.GET("", ginitemMongo.ListUser(client))
 		}
+	}
+
+	weather := r.Group("/weather")
+	{
+		weather.GET("", ginitemMongo.GetWeather(API_KEY))
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
