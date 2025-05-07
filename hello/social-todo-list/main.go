@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"log"
 	"main/common"
+	"main/component/tokenprovider/jwt"
 	"main/middleware"
 	storagemongo "main/modules/item/storage/mongodb"
 	storage "main/modules/item/storage/postgreSQL"
+	storageUser "main/modules/user/storage/postgreSQL"
+
 	ginitemMongo "main/modules/item/transport/ginitem/mongodb"
 	ginitem "main/modules/item/transport/ginitem/postgreSQL"
+	"main/modules/upload"
+	ginuser "main/modules/user/transport/ginuser/postgreSQL"
 	"net/http"
 	"os"
 	"strings"
@@ -94,13 +99,26 @@ func main() {
 
 	///CRUD:Create,Read,Update,Delete
 
+	authStore := storageUser.NewSQLStore(db)
+	tokenprovider := jwt.NewTokenJWTProvider("jwt", os.Getenv("JWT_SECRET_KEY"))
+	middlewareAuth := middleware.RequiredAuth(authStore, tokenprovider)
 	r := gin.Default()
 
+	r.Use(middleware.Recovery())
+
 	// r.Use(middleware.Recovery())
+	r.Static("/static", "./static")
 
 	v1 := r.Group("/v1")
 	{
-		items := v1.Group("/items", middleware.Recovery())
+		v1.PUT("/upload", upload.Upload(db))
+		users := v1.Group("/users")
+		{
+			users.POST("/register", ginuser.Register(db))
+			users.POST("/login", ginuser.Login(db, tokenprovider))
+			users.GET("/profile", middlewareAuth, ginuser.Profile())
+		}
+		items := v1.Group("/items", middlewareAuth)
 		{
 			items.POST("", ginitem.CreateItem(db))
 			items.GET("", ginitem.ListItem(db))
@@ -112,7 +130,7 @@ func main() {
 
 	v2 := r.Group("/v2")
 	{
-		users := v2.Group("/users")
+		users := v2.Group("/users", middleware.Recovery())
 		{
 			users.POST("", ginitemMongo.CreateUser(client))
 			users.GET("/:id", ginitemMongo.GetUser(client))

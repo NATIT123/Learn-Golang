@@ -3,38 +3,41 @@ package storage
 import (
 	"context"
 	"main/common"
-	"main/modules/item/models/postgreSQL"
+	models "main/modules/item/models/postgreSQL"
 )
 
 func (sql *sqlStore) ListItem(ctx context.Context,
 	filter *models.Filter,
 	paging *common.Paging,
 	morekeys ...string,
-	) ([]models.TodoItem,error){
-	
-		var result [] models.TodoItem
+) ([]models.TodoItem, error) {
 
+	var result []models.TodoItem
 
-		db := sql.db.Where("status <> ?","Delete")
+	db := sql.db.Where("status <> ?", "Delete")
 
+	requester := ctx.Value(common.CurrentUser).(common.Requester)
 
-		if f:=filter;f!=nil{
-			if v:=f.Status;v!=""{
-				db = db.Where("status = ?",v)
-			}
+	//Get items of requester only
+	db = db.Where("user_id = ?", requester.GetUserId())
+
+	if f := filter; f != nil {
+		if v := f.Status; v != "" {
+			db = db.Where("status = ?", v)
 		}
+	}
 
-		if	err:=db.Table(models.TodoItem{}.TableName()).
-		Count(&paging.Total).Error;err!=nil{
-			return nil,err
-		}
+	if err := db.Table(models.TodoItem{}.TableName()).
+		Count(&paging.Total).Error; err != nil {
+		return nil, err
+	}
 
-		if err:=db.Order("id desc").
-		Offset((paging.Page-1)*paging.Limit).
+	if err := db.Order("id desc").
+		Offset((paging.Page - 1) * paging.Limit).
 		Limit(paging.Limit).
-		Find(&result).Error;err!=nil{
-			return nil,err
-		}
+		Find(&result).Error; err != nil {
+		return nil, err
+	}
 
-	return result,nil
+	return result, nil
 }

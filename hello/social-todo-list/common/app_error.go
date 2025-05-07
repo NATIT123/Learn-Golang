@@ -105,6 +105,13 @@ func ErrCannotGetEntity(entity string, err error) *AppError {
 	)
 }
 
+func ErrTitleCannnotBeEmpty(entity string, err error) *AppError {
+	return NewCustomError(
+		err, fmt.Sprintf("%s cannot be blank", strings.ToLower(entity)),
+		fmt.Sprintf("Err%sCannotBeBlank", entity),
+	)
+}
+
 func ErrEntityDeleted(entity string, err error) *AppError {
 	return NewCustomError(
 		err, fmt.Sprintf("%s deleted", strings.ToLower(entity)),

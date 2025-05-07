@@ -16,18 +16,22 @@ var (
 
 type TodoItem struct {
 	common.SQLModel
-	Title       string      `json:"title" gorm:"column:title;"`
-	Description string      `json:"description" gorm:"column:description;"`
-	Status      *ItemStatus `json:"status" gorm:"column:status;"`
+	UserId      int           `json:"user_id" gorm:"column:user_id"`
+	Title       string        `json:"title" gorm:"column:title;"`
+	Description string        `json:"description" gorm:"column:description;"`
+	Status      *ItemStatus   `json:"status" gorm:"column:status;"`
+	Image       *common.Image `json:"image" gorm:"column:image;"`
 }
 
 func (TodoItem) TableName() string { return "todo_items" }
 
 type TodoItemCreation struct {
-	Id          int         `json:"id" gorm:"column:id;"`
-	Title       string      `json:"title" gorm:"column:title;"`
-	Description string      `json:"description" gorm:"column:description"`
-	Status      *ItemStatus `json:"status" gorm:"column:status"`
+	Id          int           `json:"id" gorm:"column:id;"`
+	UserId      int           `json:"-" gorm:"column:user_id;"`
+	Title       string        `json:"title" gorm:"column:title;"`
+	Description string        `json:"description" gorm:"column:description"`
+	Status      *ItemStatus   `json:"status" gorm:"column:status"`
+	Image       *common.Image `json:"image" gorm:"column:image;"`
 }
 
 type TodoItemUpdate struct {

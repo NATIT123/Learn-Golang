@@ -29,8 +29,10 @@ func UpdateItem(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
 		store := storage.NewSQLStore(db)
-		bussiness := biz.NewUpdateItemBiz(store)
+		bussiness := biz.NewUpdateItemBiz(store, requester)
 
 		if err := bussiness.UpdateItemById(c.Request.Context(), id, &data); err != nil {
 			c.JSON(http.StatusBadRequest, err)

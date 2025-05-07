@@ -2,8 +2,9 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"main/common"
-	"main/modules/item/models/postgreSQL"
+	models "main/modules/item/models/postgreSQL"
 )
 
 type DeleteItemStorage interface {
@@ -12,11 +13,12 @@ type DeleteItemStorage interface {
 }
 
 type deleteItemBiz struct {
-	store DeleteItemStorage
+	store     DeleteItemStorage
+	requester common.Requester
 }
 
-func NewDeleteItemBiz(store DeleteItemStorage) *deleteItemBiz {
-	return &deleteItemBiz{store: store}
+func NewDeleteItemBiz(store DeleteItemStorage, requester common.Requester) *deleteItemBiz {
+	return &deleteItemBiz{store: store, requester: requester}
 }
 
 func (biz *deleteItemBiz) DeletetemById(ctx context.Context, id int) error {
@@ -32,6 +34,12 @@ func (biz *deleteItemBiz) DeletetemById(ctx context.Context, id int) error {
 
 	if data.Status != nil && *data.Status == models.ItemStatusDeleted {
 		return common.NewCustomError(models.ErrItemDeleted, "item has been deleted", "ErrItemDeleted")
+	}
+
+	isOwner := biz.requester.GetUserId() == data.UserId
+
+	if !isOwner && !common.IsAdmin(biz.requester) {
+		return common.ErrNoPermission("user does not have permission to delete this item", errors.New("No permission"))
 	}
 
 	if err := biz.store.DeleteItem(ctx, map[string]interface{}{"id": id}); err != nil {

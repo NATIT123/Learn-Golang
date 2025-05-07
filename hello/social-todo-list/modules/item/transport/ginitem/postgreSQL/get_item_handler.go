@@ -2,8 +2,8 @@ package ginitem
 
 import (
 	"main/common"
-	"main/modules/item/biz/postgreSQL"
-	"main/modules/item/storage/postgreSQL"
+	biz "main/modules/item/biz/postgreSQL"
+	storage "main/modules/item/storage/postgreSQL"
 	"net/http"
 	"strconv"
 
@@ -14,9 +14,17 @@ import (
 func GetItem(db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
 
+		// go func() {
+		// 	defer common.Recovery()
+
+		// 	var a []int
+		// 	log.Println(a[0])
+		// }()
+
 		id, err := strconv.Atoi(c.Param("id"))
 
 		if err != nil {
+			// panic(common.ErrInvalidRequest(err))
 			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 			return
 		}
@@ -27,6 +35,7 @@ func GetItem(db *gorm.DB) func(*gin.Context) {
 		data, err := bussiness.GetItemById(c.Request.Context(), id)
 
 		if err != nil {
+			// panic(err) // not best parctice
 			c.JSON(http.StatusBadRequest, err)
 			return
 		}

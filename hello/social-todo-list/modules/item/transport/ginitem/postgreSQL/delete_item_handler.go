@@ -2,8 +2,8 @@ package ginitem
 
 import (
 	"main/common"
-	"main/modules/item/biz/postgreSQL"
-	"main/modules/item/storage/postgreSQL"
+	biz "main/modules/item/biz/postgreSQL"
+	storage "main/modules/item/storage/postgreSQL"
 	"net/http"
 	"strconv"
 
@@ -21,8 +21,10 @@ func DeleteItem(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
 		store := storage.NewSQLStore(db)
-		bussiness := biz.NewDeleteItemBiz(store)
+		bussiness := biz.NewDeleteItemBiz(store, requester)
 
 		if err := bussiness.DeletetemById(c.Request.Context(), id); err != nil {
 			c.JSON(http.StatusBadRequest, err)

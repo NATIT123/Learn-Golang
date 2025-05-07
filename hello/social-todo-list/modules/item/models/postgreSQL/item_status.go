@@ -32,24 +32,27 @@ func parseStr2ItemStatus(s string) (ItemStatus, error) {
 }
 
 func (item *ItemStatus) Scan(value interface{}) error {
-
 	if value == nil {
 		return errors.New("nil value provided for ItemStatus")
 	}
 
-	bytes, ok := value.([]byte)
+	var strValue string
 
-	if !ok {
-		return fmt.Errorf("fail to scan data from sql: %s", value)
+	switch v := value.(type) {
+	case []byte:
+		strValue = string(v)
+	case string:
+		strValue = v
+	default:
+		return fmt.Errorf("fail to scan data from sql: %v", value)
 	}
 
-	v, err := parseStr2ItemStatus(string(bytes))
-
+	status, err := parseStr2ItemStatus(strValue)
 	if err != nil {
-		return fmt.Errorf("fail to scan data from sql: %s", value)
+		return fmt.Errorf("fail to scan data from sql: %v", err)
 	}
 
-	*item = v
+	*item = status
 	return nil
 }
 

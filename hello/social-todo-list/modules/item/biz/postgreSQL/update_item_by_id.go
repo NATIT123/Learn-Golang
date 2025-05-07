@@ -2,8 +2,9 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"main/common"
-	"main/modules/item/models/postgreSQL"
+	models "main/modules/item/models/postgreSQL"
 )
 
 type UpdateItemStorage interface {
@@ -12,11 +13,12 @@ type UpdateItemStorage interface {
 }
 
 type updateItemBiz struct {
-	store UpdateItemStorage
+	store     UpdateItemStorage
+	requester common.Requester
 }
 
-func NewUpdateItemBiz(store UpdateItemStorage) *updateItemBiz {
-	return &updateItemBiz{store: store}
+func NewUpdateItemBiz(store UpdateItemStorage, requester common.Requester) *updateItemBiz {
+	return &updateItemBiz{store: store, requester: requester}
 }
 
 func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, dataUpdate *models.TodoItemUpdate) error {
@@ -32,6 +34,13 @@ func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, dataUpdate
 
 	if data.Status != nil && *data.Status == models.ItemStatusDeleted {
 		return common.ErrEntityDeleted(models.EntityName, models.ErrItemDeleted)
+	}
+
+	//isAdmin
+	isOwner := biz.requester.GetUserId() == data.UserId
+
+	if !isOwner && !common.IsAdmin(biz.requester) {
+		return common.ErrNoPermission("user does not have permission to update this item", errors.New("No permission"))
 	}
 
 	if err := biz.store.UpdateItem(ctx, map[string]interface{}{"id": id}, dataUpdate); err != nil {

@@ -2,9 +2,9 @@ package ginitem
 
 import (
 	"main/common"
-	"main/modules/item/biz/postgreSQL"
-	"main/modules/item/models/postgreSQL"
-	"main/modules/item/storage/postgreSQL"
+	biz "main/modules/item/biz/postgreSQL"
+	models "main/modules/item/models/postgreSQL"
+	storage "main/modules/item/storage/postgreSQL"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +19,9 @@ func CreateItem(db *gorm.DB) func(*gin.Context) {
 			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 			return
 		}
+
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+		data.UserId = requester.GetUserId()
 
 		store := storage.NewSQLStore(db)
 		bussiness := biz.NewCreateItemBiz(store)
