@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"main/common"
+	"main/modules/user/models/enum"
 	models "main/modules/user/models/postgreSQL"
 )
 
@@ -33,7 +34,7 @@ func (business *registerBusiness) Register(ctx context.Context, data *models.Use
 	user, _ := business.registerStorage.FindUser(ctx, map[string]interface{}{"email": data.Email})
 
 	if user != nil {
-		if *user.Status == models.UserStatusDeleted {
+		if *user.Status == enum.UserStatusDeleted {
 			return common.ErrEntityDeleted(models.EntityName, models.ErrUserDeleted)
 
 		}

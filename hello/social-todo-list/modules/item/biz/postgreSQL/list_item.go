@@ -26,8 +26,8 @@ func (biz *listItemBiz) ListItem(ctx context.Context,
 	filter *models.Filter,
 	paging *common.Paging) ([]models.TodoItem, error) {
 
-	ctxStore := context.WithValue(ctx, common.CurrentUser, biz.requester.GetUserId())
-	data, err := biz.store.ListItem(ctxStore, filter, paging)
+	ctxStore := context.WithValue(ctx, common.CurrentUser, biz.requester)
+	data, err := biz.store.ListItem(ctxStore, filter, paging, "Owner")
 
 	if err != nil {
 		return nil, common.ErrCannotGetEntity(models.EntityName, err)

@@ -4,14 +4,40 @@ go 1.23.1
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/joho/godotenv v1.5.1
+	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/postgres v1.5.9
+	gorm.io/driver/sqlite v1.5.7
+	gorm.io/driver/sqlserver v1.5.4
 	gorm.io/gorm v1.25.12
 )
 
-require github.com/montanaflynn/stats v0.7.1 // indirect
+require (
+	github.com/facebookgo/flagenv v0.0.0-20160425205200-fcd59fca7456 // indirect
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
+	github.com/golang-sql/sqlexp v0.1.0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/hashicorp/golang-lru v0.5.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
+	github.com/microsoft/go-mssqldb v1.7.2 // indirect
+	github.com/montanaflynn/stats v0.7.1 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/x-cray/logrus-prefixed-formatter v0.5.2 // indirect
+	go.opencensus.io v0.20.1 // indirect
+	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7 // indirect
+	golang.org/x/term v0.24.0 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
+)
 
 require (
+	github.com/200Lab-Education/go-sdk v1.1.3
+	github.com/btcsuite/btcutil v1.0.2
 	github.com/bytedance/sonic v1.12.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
@@ -40,6 +66,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/spf13/cobra v1.9.1
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -49,7 +76,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.0
 	go.mongodb.org/mongo-driver/v2 v2.0.0-beta2
 	golang.org/x/arch v0.10.0 // indirect
-	golang.org/x/crypto v0.27.0 // indirect
+	golang.org/x/crypto v0.27.0
 	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect

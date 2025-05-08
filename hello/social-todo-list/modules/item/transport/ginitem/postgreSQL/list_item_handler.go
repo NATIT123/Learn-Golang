@@ -1,10 +1,11 @@
 package ginitem
 
 import (
+	"fmt"
 	"main/common"
-	"main/modules/item/biz/postgreSQL"
-	"main/modules/item/models/postgreSQL"
-	"main/modules/item/storage/postgreSQL"
+	biz "main/modules/item/biz/postgreSQL"
+	models "main/modules/item/models/postgreSQL"
+	storage "main/modules/item/storage/postgreSQL"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,11 @@ func ListItem(db *gorm.DB) func(*gin.Context) {
 			c.JSON(http.StatusBadRequest, err)
 			return
 		}
+
+		for i := range result {
+			result[i].Mask()
+		}
+		fmt.Println(result[0].FakeId)
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filter))
 	}

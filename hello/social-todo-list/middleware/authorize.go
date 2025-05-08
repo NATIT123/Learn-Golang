@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"main/common"
 	"main/component/tokenprovider"
+	"main/modules/user/models/enum"
 	models "main/modules/user/models/postgreSQL"
 	"strings"
 
@@ -40,7 +41,6 @@ func extractTokenFromHeaderString(s string) (string, error) {
 func RequiredAuth(authStore AuthenStore, tokenProvider tokenprovider.Provider) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		token, err := extractTokenFromHeaderString(c.GetHeader("Authorization"))
-		fmt.Println("token", token)
 		if err != nil {
 			panic(err)
 		}
@@ -58,7 +58,7 @@ func RequiredAuth(authStore AuthenStore, tokenProvider tokenprovider.Provider) f
 			panic(err) // Again, consider returning an error to the client.
 		}
 
-		if *user.Status == models.UserStatusDeleted {
+		if *user.Status == enum.UserStatusDeleted {
 			panic(common.ErrNoPermission("authorization failed", errors.New("user has been deleted or banned")))
 		}
 

@@ -1,26 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"main/common"
-	"main/component/tokenprovider/jwt"
-	"main/middleware"
-	storagemongo "main/modules/item/storage/mongodb"
-	storage "main/modules/item/storage/postgreSQL"
-	storageUser "main/modules/user/storage/postgreSQL"
-
-	ginitemMongo "main/modules/item/transport/ginitem/mongodb"
-	ginitem "main/modules/item/transport/ginitem/postgreSQL"
-	"main/modules/upload"
-	ginuser "main/modules/user/transport/ginuser/postgreSQL"
-	"net/http"
-	"os"
-	"strings"
+	"main/cmd"
 
 	"github.com/joho/godotenv"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -30,130 +14,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	PORT := os.Getenv("PORT")
-	DB_CONN_STR := os.Getenv("DB_CONN_STR")
 
-	db := storage.CreateSQL(DB_CONN_STR)
+	// ////MongoDb
+	// DB_MONGO := os.Getenv("DB_MONGO")
+	// DB_MONGO = strings.Replace(DB_MONGO, "db_username", os.Getenv("DB_MONGO_USER"), 1)
+	// DB_MONGO = strings.Replace(DB_MONGO, "<db_password>", os.Getenv("DB_MONGO_PASSWORD"), 1)
+	// store := storagemongo.CreateMongo(DB_MONGO)
+	// client := store.Client
 
-	////MongoDb
-	DB_MONGO := os.Getenv("DB_MONGO")
-	DB_MONGO = strings.Replace(DB_MONGO, "db_username", os.Getenv("DB_MONGO_USER"), 1)
-	DB_MONGO = strings.Replace(DB_MONGO, "<db_password>", os.Getenv("DB_MONGO_PASSWORD"), 1)
-	store := storagemongo.CreateMongo(DB_MONGO)
-	client := store.Client
-
-	//Weather
-	API_KEY := os.Getenv("OpenWeatherMapApiKey")
-
-	// now:=time.Now().UTC()
-
-	// item := TodoItem{
-	// 	Id:	1,
-	// 	Title:"This is item 1",
-	// 	Description:"This is item 1",
-	// 	Status:	ItemStatusDoing,
-	// 	CreatedAt: &now,
-	// 	UpdatedAt: nil,
-	// }
-
-	// ///Convert JSONData =byte[],err
-	// jsonData,err:= json.Marshal(item)
-
-	// if err!=nil{
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	// ///Convert to JSON
-	// fmt.Println(string(jsonData))
-
-	// var item2 TodoItem
-
-	// if err:=json.Unmarshal([]byte(jsonData),&item2); err!=nil{
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	// fmt.Println(item2)
-
-	/////For
-	sum := 0
-	for i := 0; i < 10; i++ {
-		sum += i
-	}
-
-	fmt.Printf("Sum: %d\n", sum)
-
-	///While in Go
-	sum = 1
-	for sum < 1000 {
-		sum += sum
-	}
-
-	fmt.Println("Sum:", sum)
-
-	var pow = []int{1, 2, 3, 4, 5}
-	for i, value := range pow {
-		fmt.Printf("Index: %d,Value: %d\n", i, value)
-	}
-
-	///CRUD:Create,Read,Update,Delete
-
-	authStore := storageUser.NewSQLStore(db)
-	tokenprovider := jwt.NewTokenJWTProvider("jwt", os.Getenv("JWT_SECRET_KEY"))
-	middlewareAuth := middleware.RequiredAuth(authStore, tokenprovider)
-	r := gin.Default()
-
-	r.Use(middleware.Recovery())
-
-	// r.Use(middleware.Recovery())
-	r.Static("/static", "./static")
-
-	v1 := r.Group("/v1")
-	{
-		v1.PUT("/upload", upload.Upload(db))
-		users := v1.Group("/users")
-		{
-			users.POST("/register", ginuser.Register(db))
-			users.POST("/login", ginuser.Login(db, tokenprovider))
-			users.GET("/profile", middlewareAuth, ginuser.Profile())
-		}
-		items := v1.Group("/items", middlewareAuth)
-		{
-			items.POST("", ginitem.CreateItem(db))
-			items.GET("", ginitem.ListItem(db))
-			items.GET("/:id", ginitem.GetItem(db))
-			items.PATCH("/:id", ginitem.UpdateItem(db))
-			items.DELETE("/:id", ginitem.DeleteItem(db))
-		}
-	}
-
-	v2 := r.Group("/v2")
-	{
-		users := v2.Group("/users", middleware.Recovery())
-		{
-			users.POST("", ginitemMongo.CreateUser(client))
-			users.GET("/:id", ginitemMongo.GetUser(client))
-			users.PATCH("/:id", ginitemMongo.UpdateUser(client))
-			users.DELETE("/:id", ginitemMongo.DeleteUser(client))
-			users.GET("", ginitemMongo.ListUser(client))
-		}
-	}
-
-	weather := r.Group("/weather")
-	{
-		weather.GET("", ginitemMongo.GetWeather(API_KEY))
-	}
-
-	r.GET("/ping", func(c *gin.Context) {
-		go func() {
-			defer common.Recovery()
-			fmt.Println([]int{}[0])
-		}()
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello World",
-		})
-	})
-	r.Run(PORT) // listen and serve on 0.0.0.0:3000(for windows "localhost:3000")
+	cmd.Excucte()
 
 }

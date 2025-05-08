@@ -32,7 +32,9 @@ func (sql *sqlStore) ListItem(ctx context.Context,
 		return nil, err
 	}
 
-	if err := db.Order("id desc").
+	db = db.Preload("Owner")
+
+	if err := db.Select("*").Order("id desc").
 		Offset((paging.Page - 1) * paging.Limit).
 		Limit(paging.Limit).
 		Find(&result).Error; err != nil {

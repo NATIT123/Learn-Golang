@@ -1,85 +1,25 @@
 package models
 
 import (
-	"database/sql/driver"
 	"errors"
-	"fmt"
 	"main/common"
+	"main/modules/user/models/enum"
 )
 
 const (
 	EntityName = "User"
 )
 
-type UserRole int
-
-const (
-	RoleUser UserRole = 1 << iota
-	RoleAdmin
-	RoleShipper
-	RoleMod
-)
-
-func (role UserRole) String() string {
-	switch role {
-	case RoleAdmin:
-		return "admin"
-	case RoleShipper:
-		return "shipper"
-	case RoleMod:
-		return "mod"
-	default:
-		return "user"
-	}
-}
-
-func (role *UserRole) Scan(value interface{}) error {
-	var roleStr string
-
-	switch v := value.(type) {
-	case []byte:
-		roleStr = string(v)
-	case string:
-		roleStr = v
-	default:
-		return fmt.Errorf("Failed to scan role: unexpected type %T", value)
-	}
-
-	switch roleStr {
-	case "admin":
-		*role = RoleAdmin
-	case "shipper":
-		*role = RoleShipper
-	case "mod":
-		*role = RoleMod
-	default:
-		*role = RoleUser
-	}
-
-	return nil
-}
-
-func (role *UserRole) Value() (driver.Value, error) {
-	if role == nil {
-		return nil, nil
-	}
-	return role.String(), nil
-}
-
-func (role *UserRole) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", role.String())), nil
-}
-
 type User struct {
 	common.SQLModel
-	Email     string      `json:"email" gorm:"column:email;"`
-	Password  string      `json:"-" gorm:"column:password;"`
-	Salt      string      `json:"-" gorm:"column:salt;"`
-	LastName  string      `json:"last_name" gorm:"column:last_name;"`
-	FirstName string      `json:"first_name" gorm:"column:first_name;"`
-	Phone     string      `json:"phone" gorm:"column:phone;"`
-	Status    *UserStatus `json:"status" gorm:"column:status;"`
-	Role      *UserRole   `json:"role" gorm:"column:role;"`
+	Email     string           `json:"email" gorm:"column:email;"`
+	Password  string           `json:"-" gorm:"column:password;"`
+	Salt      string           `json:"-" gorm:"column:salt;"`
+	LastName  string           `json:"last_name" gorm:"column:last_name;"`
+	FirstName string           `json:"first_name" gorm:"column:first_name;"`
+	Phone     string           `json:"phone" gorm:"column:phone;"`
+	Status    *enum.UserStatus `json:"status" gorm:"column:status;"`
+	Role      *enum.UserRole   `json:"role" gorm:"column:role;"`
 }
 
 func (u *User) GetUserId() int {
