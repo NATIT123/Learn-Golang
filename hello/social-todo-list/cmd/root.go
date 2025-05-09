@@ -2,15 +2,19 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"main/common"
-	"main/component/tokenprovider/jwt"
 	"main/middleware"
 	storagemongo "main/modules/item/storage/mongodb"
 	ginitemMongo "main/modules/item/transport/ginitem/mongodb"
 	ginitem "main/modules/item/transport/ginitem/postgreSQL"
+	ginuserlikeitem "main/modules/userlikeitem/transport/gin"
+
 	"main/modules/upload"
 	userStorage "main/modules/user/storage/postgreSQL"
 	ginuser "main/modules/user/transport/ginuser/postgreSQL"
+	"main/plugin/simple"
+	"main/plugin/tokenprovider/jwt"
 	"net/http"
 	"os"
 	"strings"
@@ -27,6 +31,8 @@ func newService() goservice.Service {
 		goservice.WithName("social-todo-list"),
 		goservice.WithVersion("1.0.0"),
 		goservice.WithInitRunnable(sdkgorm.NewGormDB("main", common.PluginDBMain)),
+		// goservice.WithInitRunnable(jwt.NewTokenJWTProvider(common.PluginJWT)),
+		goservice.WithInitRunnable(simple.NewSimplePlugin("simple")),
 	)
 
 	return service
@@ -58,28 +64,38 @@ var rootCmd = &cobra.Command{
 
 		service.HTTPServer().AddHandler(func(engine *gin.Engine) {
 			engine.Use(middleware.Recovery())
-			db := service.MustGet(common.PluginDBMain).(*gorm.DB)
-			authStore := userStorage.NewSQLStore(db)
+
+			type CanGetValue interface {
+				GetValue() string
+			}
+
+			log.Println(service.MustGet("simple").(CanGetValue).GetValue())
+			serviceDb := service.MustGet(common.PluginDBMain).(*gorm.DB)
+			authStore := userStorage.NewSQLStore(serviceDb)
 			tokenprovider := jwt.NewTokenJWTProvider("jwt", os.Getenv("JWT_SECRET_KEY"))
 			middlewareAuth := middleware.RequiredAuth(authStore, tokenprovider)
 
 			engine.Static("/static", "./static")
 			v1 := engine.Group("/v1")
 			{
-				v1.PUT("/upload", upload.Upload(db))
+				v1.PUT("/upload", upload.Upload(serviceDb))
 				users := v1.Group("/users")
 				{
-					users.POST("/register", ginuser.Register(db))
-					users.POST("/login", ginuser.Login(db, tokenprovider))
+					users.POST("/register", ginuser.Register(serviceDb))
+					users.POST("/login", ginuser.Login(serviceDb, tokenprovider))
 					users.GET("/profile", middlewareAuth, ginuser.Profile())
 				}
 				items := v1.Group("/items", middlewareAuth)
 				{
-					items.POST("", ginitem.CreateItem(db))
-					items.GET("", ginitem.ListItem(db))
-					items.GET("/:id", ginitem.GetItem(db))
-					items.PATCH("/:id", ginitem.UpdateItem(db))
-					items.DELETE("/:id", ginitem.DeleteItem(db))
+					items.POST("", ginitem.CreateItem(serviceDb))
+					items.GET("", ginitem.ListItem(serviceDb))
+					items.GET("/:id", ginitem.GetItem(serviceDb))
+					items.PATCH("/:id", ginitem.UpdateItem(serviceDb))
+					items.DELETE("/:id", ginitem.DeleteItem(serviceDb))
+
+					items.POST("/:id/like", ginuserlikeitem.UserLikeItem(service))
+					items.DELETE("/:id/unlike", ginuserlikeitem.UserUnLikeItem(service))
+					items.GET("/:id/user-liked-users", ginuserlikeitem.ListUserLiked(service))
 				}
 			}
 

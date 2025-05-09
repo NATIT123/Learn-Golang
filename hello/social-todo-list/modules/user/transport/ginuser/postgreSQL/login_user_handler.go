@@ -2,10 +2,10 @@ package ginuser
 
 import (
 	"main/common"
-	"main/component/tokenprovider"
 	"main/modules/user/biz"
 	models "main/modules/user/models/postgreSQL"
 	storage "main/modules/user/storage/postgreSQL"
+	"main/plugin/tokenprovider"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"main/common"
-	"main/component/tokenprovider"
 	"main/modules/user/models/enum"
 	models "main/modules/user/models/postgreSQL"
+	"main/plugin/tokenprovider"
 	"strings"
 
 	"github.com/gin-gonic/gin"

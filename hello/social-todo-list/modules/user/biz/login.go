@@ -3,8 +3,8 @@ package biz
 import (
 	"context"
 	"main/common"
-	"main/component/tokenprovider"
 	models "main/modules/user/models/postgreSQL"
+	"main/plugin/tokenprovider"
 )
 
 type LoginStorage interface {
