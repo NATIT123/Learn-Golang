@@ -48,6 +48,6 @@ func (s *simplePlugin) Stop() <-chan bool {
 	return c
 }
 
-func (s *simplePlugin) GetValu() string {
+func (s *simplePlugin) GetValue() string {
 	return s.value
 }

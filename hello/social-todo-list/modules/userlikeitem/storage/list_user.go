@@ -2,9 +2,15 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"main/common"
 	models "main/modules/userlikeitem/models"
+	"time"
+
+	"github.com/btcsuite/btcutil/base58"
 )
+
+const timelayout = "2006-01-02T15:04:05.999999"
 
 func (s *sqlStore) ListUsers(
 	ctx context.Context,
@@ -19,11 +25,19 @@ func (s *sqlStore) ListUsers(
 		return nil, common.ErrDB(err)
 	}
 
-	if err := db.Select("*").
-		Order("create_at desc").
-		Offset((paging.Page - 1) * paging.Limit).
+	//Seeking Paging
+	if v := paging.FakeCursor; v != "" {
+		timeCreated, err := time.Parse(timelayout, string(base58.Decode(v)))
+		if err != nil {
+			return nil, common.ErrDB(err)
+		}
+		db = db.Where("created_at < ?", timeCreated.Format("2006-01-02 15:04:05.999999999"))
+	} else {
+		db = db.Offset((paging.Page - 1) * paging.Limit)
+	}
+
+	if err := db.Select("*").Preload("User").Order("created_at desc").
 		Limit(paging.Limit).
-		Preload("User").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
@@ -36,5 +50,33 @@ func (s *sqlStore) ListUsers(
 		users[i].CreatedAt = result[i].CreatedAt
 	}
 
+	if len(users) > 0 {
+		users[len(result)-1].Mask()
+		paging.NextCursor = base58.Encode([]byte(fmt.Sprintf("%v", users[len(result)-1].CreatedAt.Format(timelayout))))
+	}
+
 	return users, nil
+}
+
+func (s *sqlStore) GetItemLikes(ctx context.Context, ids []int) (map[int]int, error) {
+	result := make(map[int]int)
+
+	type sqlData struct {
+		ItemId int `gorm:"column:item_id"`
+		Count  int `gorm:"column:count"`
+	}
+
+	var listLike []sqlData
+
+	if err := s.db.Table(models.Like{}.TableName()).Select("item_id, COUNT(item_id) as `count`").
+		Where("item_id in (?)", ids).
+		Group("item_id").Find(&listLike); err != nil {
+		return nil, common.ErrDB(err.Error)
+	}
+
+	for _, item := range listLike {
+		result[item.ItemId] = item.Count
+	}
+
+	return result, nil
 }

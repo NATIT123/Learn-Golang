@@ -74,3 +74,7 @@ func DecomposeUID(s string) (UID, error) {
 func (uid UID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("\"%s\"", uid.String())), nil
 }
+
+func FromBase58(s string) (UID, error) {
+	return DecomposeUID(string(base58.Decode(s)))
+}

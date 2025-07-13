@@ -2,6 +2,7 @@ package ginuserlikeitem
 
 import (
 	"main/common"
+	itemStorage "main/modules/item/storage/postgreSQL"
 	"main/modules/userlikeitem/biz"
 	storage "main/modules/userlikeitem/storage"
 	"net/http"
@@ -24,7 +25,8 @@ func UserUnLikeItem(serviceCtx goservice.ServiceContext) gin.HandlerFunc {
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 		db := serviceCtx.MustGet(common.PluginDBMain).(*gorm.DB)
 		store := storage.NewSQLStore(db)
-		biz := biz.NewUserUnlikeItemBiz(store)
+		itemStore := itemStorage.NewSQLStore(db)
+		biz := biz.NewUserUnlikeItemBiz(store, itemStore)
 		if err := biz.UnlikeItem(c.Request.Context(), requester.GetUserId(), id); err != nil {
 			panic(err)
 		}

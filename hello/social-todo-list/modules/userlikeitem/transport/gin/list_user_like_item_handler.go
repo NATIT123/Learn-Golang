@@ -5,7 +5,6 @@ import (
 	"main/modules/userlikeitem/biz"
 	storage "main/modules/userlikeitem/storage"
 	"net/http"
-	"strconv"
 
 	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/gin-gonic/gin"
@@ -14,12 +13,10 @@ import (
 
 func ListUserLiked(serviceCtx goservice.ServiceContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
+		uid, err := common.FromBase58(c.Param("id"))
 
 		if err != nil {
-			// panic(common.ErrInvalidRequest(err))
-			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		var queryString struct {
@@ -40,7 +37,7 @@ func ListUserLiked(serviceCtx goservice.ServiceContext) gin.HandlerFunc {
 		store := storage.NewSQLStore(db)
 		business := biz.NewListUserLikeItemBiz(store)
 
-		result, err := business.ListLikedItem(c.Request.Context(), id, &queryString.Paging)
+		result, err := business.ListLikedItem(c.Request.Context(), int(uid.GetLocalID()), &queryString.Paging)
 
 		if err != nil {
 			panic(err)

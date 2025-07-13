@@ -1,10 +1,9 @@
 package common
 
 import (
+	"golang.org/x/crypto/bcrypt"
 	"math/rand"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type rune = int32

@@ -1,11 +1,12 @@
 package ginitem
 
 import (
-	"fmt"
 	"main/common"
 	biz "main/modules/item/biz/postgreSQL"
 	models "main/modules/item/models/postgreSQL"
+	"main/modules/item/repository"
 	storage "main/modules/item/storage/postgreSQL"
+	usrLikeStore "main/modules/userlikeitem/storage"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +39,11 @@ func ListItem(db *gorm.DB) func(*gin.Context) {
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 
 		store := storage.NewSQLStore(db)
-		bussiness := biz.NewListItemBiz(store, requester)
+
+		///Repository
+		likeStore := usrLikeStore.NewSQLStore(db)
+		repo := repository.NewListItemRepo(store, likeStore, requester)
+		bussiness := biz.NewListItemBiz(repo, requester)
 
 		result, err := bussiness.ListItem(c.Request.Context(), &filter, &paging)
 
@@ -50,7 +55,6 @@ func ListItem(db *gorm.DB) func(*gin.Context) {
 		for i := range result {
 			result[i].Mask()
 		}
-		fmt.Println(result[0].FakeId)
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filter))
 	}
