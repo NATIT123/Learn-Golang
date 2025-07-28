@@ -10,6 +10,7 @@ import (
 	"main/plugin/tokenprovider"
 	"strings"
 
+	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,7 +39,7 @@ func extractTokenFromHeaderString(s string) (string, error) {
 // 1. Get token from header
 // 2. Validate token and parse to payload
 // 3. From the token payload, we use user_id to find from DB
-func RequiredAuth(authStore AuthenStore, tokenProvider tokenprovider.Provider) func(c *gin.Context) {
+func RequiredAuth(authStore AuthenStore, serviceCtx goservice.ServiceContext) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		token, err := extractTokenFromHeaderString(c.GetHeader("Authorization"))
 		if err != nil {
@@ -47,6 +48,8 @@ func RequiredAuth(authStore AuthenStore, tokenProvider tokenprovider.Provider) f
 
 		// db := appCtx.GetMaiDBConnection()
 		// store := userstore.NewSQLStore(db)
+
+		tokenProvider := serviceCtx.MustGet(common.PluginJWT).(tokenprovider.Provider)
 
 		payload, err := tokenProvider.Validate(token)
 		if err != nil {

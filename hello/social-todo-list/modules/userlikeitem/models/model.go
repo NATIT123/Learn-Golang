@@ -17,6 +17,8 @@ type Like struct {
 	User      *common.SimpleUser `json:"-" gorm:"foreignKey:UserId;"`
 }
 
+func (l *Like) GetItemId() int { return l.ItemId }
+
 func (Like) TableName() string {
 	return "user_like_items"
 }

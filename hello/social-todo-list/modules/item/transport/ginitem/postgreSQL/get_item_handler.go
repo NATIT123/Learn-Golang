@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"strconv"
 
+	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func GetItem(db *gorm.DB) func(*gin.Context) {
+func GetItem(serviceCtx goservice.ServiceContext) func(*gin.Context) {
 	return func(c *gin.Context) {
 
 		// go func() {
@@ -28,7 +29,7 @@ func GetItem(db *gorm.DB) func(*gin.Context) {
 			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 			return
 		}
-
+		db := serviceCtx.MustGet(common.PluginDBMain).(*gorm.DB)
 		store := storage.NewSQLStore(db)
 		bussiness := biz.NewGetItemBiz(store)
 

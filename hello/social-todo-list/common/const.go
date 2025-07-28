@@ -14,7 +14,13 @@ const (
 )
 
 const (
-	PluginDBMain = "postgres"
+	PluginDBMain         = "postgres"
+	PluginJWT            = "jwt"
+	PluginPubSub         = "pubsub"
+	TopicUserLikedItem   = "TopicUserLikedItem"
+	TopicUserUnLikedItem = "TopicUserUnLikedItem"
+	PluginAPIItem        = "item-api"
+	PluginRedis          = "redis"
 )
 
 func Recovery() {

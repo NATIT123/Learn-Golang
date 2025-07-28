@@ -43,6 +43,10 @@ func ListUserLiked(serviceCtx goservice.ServiceContext) gin.HandlerFunc {
 			panic(err)
 		}
 
+		for i := range result {
+			result[i].Mask()
+		}
+
 		c.JSON(http.StatusOK, common.NewSuccessResponse(result, queryString.Paging, nil))
 	}
 }

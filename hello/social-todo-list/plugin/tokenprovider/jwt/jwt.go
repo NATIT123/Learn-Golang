@@ -14,6 +14,41 @@ type jwtProvider struct {
 	secret string
 }
 
+// Configure implements goservice.PrefixRunnable.
+func (j *jwtProvider) Configure() error {
+	panic("unimplemented")
+}
+
+// Get implements goservice.PrefixRunnable.
+func (j *jwtProvider) Get() interface{} {
+	panic("unimplemented")
+}
+
+// GetPrefix implements goservice.PrefixRunnable.
+func (j *jwtProvider) GetPrefix() string {
+	panic("unimplemented")
+}
+
+// InitFlags implements goservice.PrefixRunnable.
+func (j *jwtProvider) InitFlags() {
+	panic("unimplemented")
+}
+
+// Name implements goservice.PrefixRunnable.
+func (j *jwtProvider) Name() string {
+	panic("unimplemented")
+}
+
+// Run implements goservice.PrefixRunnable.
+func (j *jwtProvider) Run() error {
+	panic("unimplemented")
+}
+
+// Stop implements goservice.PrefixRunnable.
+func (j *jwtProvider) Stop() <-chan bool {
+	panic("unimplemented")
+}
+
 func NewTokenJWTProvider(prefix string, secret string) *jwtProvider {
 	return &jwtProvider{
 		prefix: prefix,

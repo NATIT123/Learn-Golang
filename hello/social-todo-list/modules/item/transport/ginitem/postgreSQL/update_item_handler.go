@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
+	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func UpdateItem(db *gorm.DB) func(*gin.Context) {
+func UpdateItem(serviceCtx goservice.ServiceContext) func(*gin.Context) {
 	return func(c *gin.Context) {
 
 		var data models.TodoItemUpdate
@@ -28,6 +29,8 @@ func UpdateItem(db *gorm.DB) func(*gin.Context) {
 			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 			return
 		}
+
+		db := serviceCtx.MustGet(common.PluginDBMain).(*gorm.DB)
 
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 
