@@ -21,6 +21,7 @@ const (
 	TopicUserUnLikedItem = "TopicUserUnLikedItem"
 	PluginAPIItem        = "item-api"
 	PluginRedis          = "redis"
+	PluginS3Provider     = "s3"
 )
 
 func Recovery() {
